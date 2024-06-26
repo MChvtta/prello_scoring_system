@@ -2,13 +2,10 @@
 # coding: utf-8
 
 # # ⚙️ **CLEANED DATA IMPORT**
-
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
 import os
+from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler
 
 DATA_PATH = '../data/cleaned'
 
@@ -55,10 +52,6 @@ real_estate_df = pd.read_csv(os.path.join(DATA_PATH, REAL_ESTATE_FILENAME))
 # Nombre de jours de soleil par an par départements : sunny_df_per_department
 # Fusion de tous DF Life Quality  par départements (POUR NORMALISATIN AU SCORING) : life_quality_df
 
-
-# In[ ]:
-
-
 # DF CLEANED CHECK
 poi_df.info()
 site_df.info()
@@ -69,9 +62,6 @@ sales_df.info()
 population_df.info() 
 poverty_df.info()
 real_estate_df.info()
-
-
-# In[ ]:
 
 
 #test
@@ -85,48 +75,25 @@ filtered_df
 
 # ##### DF_SALES CLEANING
 
-# In[2]:
-
-
 # SALES_DF: Suppression des doublons > nous passons de 4,3M de lignes à 3,821M
 sales_df = sales_df.drop_duplicates()
 sales_df.shape
 
-
-# In[3]:
-
-
 # SALES_DF: Check si les doublons on été enlevés : OK
 sales_df.duplicated().sum()
-
-
-# In[4]:
-
 
 # SALES_DF: Suppression des prix au m2 supérieur à 30K€ et inférieur à 1K€ > nous passons à 3,3399M de lignes
 sales_df = sales_df[(sales_df['sales_price_m2'] <= 30000) & (sales_df['sales_price_m2'] >= 500)]
 sales_df.shape
-
-
-# In[5]:
-
 
 # SALES_DF:
 s2 = (sales_df['sales_amount']
              .value_counts()
              .loc[sales_df['sales_amount'].value_counts() > 10])
 
-
-# In[6]:
-
-
 # SALES_DF:
 sales_df = sales_df[sales_df['sales_amount'] > 1] # on enlève les 166 fois ou sales_amount = 1€
 sales_df.shape
-
-
-# In[7]:
-
 
 # SALES_DF: changement du type sales_date en datetime
 sales_df['sales_date'] = pd.to_datetime(sales_df['sales_date'])
@@ -135,9 +102,6 @@ sales_df["municipality_code"].nunique()
 
 # ##### DF_SALARY CLEANING
 
-# In[8]:
-
-
 # DF_SALARY: ROUND avg_net_salary
 salary_df['avg_net_salary'] = salary_df['avg_net_salary'].round()
 salary_df.head()
@@ -145,17 +109,12 @@ salary_df.head()
 
 # ##### DF_REAL_ESTATE CLEANING
 
-# In[9]:
-
-
 # DF_REAL_ESTATE: suppression des nulls
 real_estate_df = real_estate_df.dropna(axis=1)
 real_estate_df.isnull().sum()
 
 
 # ##### DF_SITE CLEANING
-
-# In[10]:
 
 
 # SITE_DF: tri avec les données entre parenthèses de la colonne "name" inclues
@@ -176,15 +135,9 @@ print (site_df["data_inside_parenthesis"].value_counts().head(50))
 #faire un mapping des colonnes poi, qui sont en fait plus pertinentes que celles de la colonne "type"
 
 
-# In[11]:
-
-
 # SITE_DF: création d'un dictionnaire intégrant toutes les différentes valeurs inclues dans la colonne "poi"
 s = site_df["poi"].value_counts()[site_df["poi"]]
 {k: "toto" for k in s.index}
-
-
-# In[12]:
 
 
 # SITE_DF: création d'un dictionnaire avec les catégories associées aux valeurs de la colonne POI
@@ -229,106 +182,23 @@ category_dict = {'1': 'Patrimoine',
  'protected_area': 'Nature'}
 
 
-# In[13]:
-
-
 # SITE_DF: création de la colonne "catégorie"
 site_df["Category"] = site_df["poi"].map(category_dict)
 site_df
 
 
-# In[ ]:
-
-
-poi_df.info()
-site_df.info()
-salary_df.info()
-georef_df.info() 
-stock_df.info() 
-sales_df.info()
-population_df.info() 
-poverty_df.info()
-real_estate_df.info()
-
-
-# In[ ]:
-
-
-poi_df.head(1)
-
-
-# In[ ]:
-
-
-site_df.head(1) 
-
-
-# In[ ]:
-
-
-salary_df.head(1)
-
-
-# In[ ]:
-
-
-georef_df.head(1) 
-
-
-# In[ ]:
-
-
-stock_df.head(1) 
-
-
-# In[ ]:
-
-
-sales_df.head(1)
-
-
-# In[ ]:
-
-
-population_df.head(1) 
-
-
-# In[ ]:
-
-
-poverty_df.head(1)
-
-
-# In[ ]:
-
-
-real_estate_df.head(1)
-
-
 # # 🧪 **DATA TRANSFORMATION**
-
 # ### KPIS AGGREGATION BY DEPARTMENT
-
 # ##### 1. TOURISM
-
-# In[14]:
-
 
 #création de tables permettant de scorer le potentiel touristique de chaque département
 site_df = site_df.merge (georef_df, on=["municipality_code"])
 site_df.head(5)
 
 
-# In[20]:
-
-
 #sélection des colonnes dont on aura besoin pour le calcul
 site_df_department = site_df[["poi", "name", "municipality_code", "importance", "name_reprocessed", "department_name"]]
 site_df_department
-
-
-# In[21]:
-
 
 #groupement par département, puis classement par le département ayant le + d'atouts touristiques
 group_site = site_df_department.groupby("department_name")[["importance"]].sum()
@@ -336,15 +206,9 @@ group_site
 group_site.sort_values("importance", ascending =False)
 
 
-# In[17]:
-
-
 #même calcul que précédemment, mais pour la partie concernant les logements/lieux de villégiature
 poi_df = poi_df.merge (georef_df, on=["municipality_code"])
 poi_df.head(5)
-
-
-# In[18]:
 
 
 #sélection des colonnes dont on aura besoin pour le calcul
@@ -352,16 +216,10 @@ poi_df_department = poi_df[["poi", "municipality_code", "importance", "departmen
 poi_df_department
 
 
-# In[19]:
-
-
 #groupement par département, puis classement par le département ayant le + de logements/lieux de villégiature
 group_poi = poi_df_department.groupby("department_name")[["importance"]].sum()
 group_poi
 group_poi.sort_values("importance", ascending =False)
-
-
-# In[22]:
 
 
 #ajout des 2 calculs d'importance
@@ -375,23 +233,9 @@ department_merged_df
 
 
 # ##### 2. REAL ESTATE
-
-# In[23]:
-
-
 # 2.1 calcul du loyer au m2 médian par municipality_code
 rental_med = real_estate_df [["municipality_code", "rental_med_all"]]
 rental_med
-
-
-# In[ ]:
-
-
-sales_df
-
-
-# In[24]:
-
 
 #calcul du prix d'achat au m2 médian par municipality_code
 sales_df
@@ -400,16 +244,10 @@ sales_df_grouped = pd.DataFrame (sales_df_grouped)
 sales_df_grouped
 
 
-# In[25]:
-
-
 #jointure pour rajouter dans cette table le loyer médian par municipality_code
 sales_df
 real_estate_grouped = sales_df_grouped.merge(rental_med, on="municipality_code")
 real_estate_grouped
-
-
-# In[26]:
 
 
 #ajout du nom du département correspondant à chaque municipality code
@@ -418,13 +256,7 @@ real_estate_department
 real_estate_department = real_estate_department [["municipality_code", "sales_amount", "surface", "rental_med_all", "department_name", "premise_type"]]
 
 
-# In[ ]:
-
-
 real_estate_department
-
-
-# In[27]:
 
 
 #calcul du prix au m2 par département
@@ -432,9 +264,6 @@ average_price_per_m2 = real_estate_department.groupby(["department_name"])[["sal
 average_price_per_m2
 average_price_per_m2["average_price_per_m2"] = average_price_per_m2["sales_amount"]/average_price_per_m2["surface"]
 average_price_per_m2.sort_values("average_price_per_m2")
-
-
-# In[28]:
 
 
 #calcul du loyer médian par départment
@@ -446,9 +275,6 @@ average_rental["average_rental"]= average_rental["intermediate_sum"]/average_ren
 average_rental
 
 
-# In[29]:
-
-
 #regroupement des colonnes avec le loyer moyen au m2 par département et le prix d'achat au m2 moyen par département
 yield_calculation = average_price_per_m2.merge(average_rental, on="department_name")
 yield_calculation
@@ -457,14 +283,8 @@ yield_calculation["yield_rate"]=yield_calculation["average_rental"]*12/yield_cal
 yield_calculation.sort_values("yield_rate", ascending=True)
 
 
-# In[ ]:
-
-
 #Informations sur la rentabilité locative
 yield_calculation
-
-
-# In[30]:
 
 
 # 2.2 calcul de la variation entre 2018 et 2021
@@ -473,32 +293,17 @@ yield_calculation
 sales_df.info()
 sales_df["year"]=sales_df["sales_date"].dt.year
 
-
-# In[31]:
-
-
 #merge pour rajouter le département
 sales_info_per_department = sales_df.merge (georef_df, on=["municipality_code"])
 sales_info_per_department
-
-
-# In[32]:
-
 
 #filtre uniquement sur les années 2020 et 2021 (car ce sont les seules années où nous avons toutes les informations)
 sales_info_per_department = sales_info_per_department[sales_info_per_department['year'].isin([2020, 2021])]
 sales_info_per_department
 
-
-# In[33]:
-
-
 #groupement par année et par département
 sales_df_per_year = sales_info_per_department.groupby(["department_name", "year"])[["sales_amount", "surface"]].agg({"sales_amount": "sum", "surface": "sum"})
 sales_df_per_year
-
-
-# In[34]:
 
 
 #calcul du prix moyen au m2
@@ -506,26 +311,14 @@ sales_df_per_year["average_price_m2"]=sales_df_per_year["sales_amount"]/sales_df
 sales_df_per_year
 sales_df_per_year.head(50)
 
-
-# In[35]:
-
-
 #calcul de l'évolution entre 2018 et 2021
 sales_df_per_year['price_m2_growth'] = sales_df_per_year.groupby('department_name')['average_price_m2'].pct_change()
 sales_df_per_year
-
-
-# In[36]:
-
 
 #calcul final de l'évolution
 sales_df_per_year = sales_df_per_year.dropna()
 sales_df_per_year.drop (columns=["sales_amount", "surface"])
 sales_df_per_year.sort_values ("price_m2_growth", ascending=False)
-
-
-# In[37]:
-
 
 #calcul du nb de maisons vacantes en 2019
 stock_df_2018 = stock_df[stock_df['year'].isin([2018])]
@@ -536,17 +329,7 @@ vacants_housing_per_department = pd.DataFrame(vacants_housing_per_department)
 vacants_housing_per_department
 
 
-# In[ ]:
-
-
-stock_df_2018
-
-
-# In[38]:
-
-
 # 2.3 taxe d'habitation sur les maisons secondaires par département
-
 TAX_FILENAME = 'taxe_habitation.xlsx'
 
 tax_df = pd.read_excel(os.path.join(DATA_PATH, TAX_FILENAME))
@@ -556,10 +339,6 @@ tax_df
 
 
 # ##### 3. SECONDARY HOME
-
-# In[39]:
-
-
 # 3.1 Superficie moyenne des logements vendus par départements
 
 # Joindre les informations de géolocalisation pour obtenir les départements
@@ -570,21 +349,11 @@ real_estate_sales_dep = sales_df.merge(
 
 # Calculer la surface moyenne des logements vendus par département
 average_surface_municipality = real_estate_sales_dep.groupby('department_name')['surface'].mean().reset_index()
-
 average_surface_municipality
 
 
-# In[ ]:
-
-
-
-
-
-# In[40]:
-
 
 # 3.2 Évolution du % des maisons secondaires par département
-
 # Filtrer les données pour les années 2008 et 2018
 housing_2008 = stock_df[stock_df['year'] == 2008]
 housing_2018 = stock_df[stock_df['year'] == 2018]
@@ -607,12 +376,7 @@ secondary_home_rate_evolution_department = secondary_home_rate_comparison.groupb
 secondary_home_rate_evolution_department["evolution_secondary_homes"]=((secondary_home_rate_evolution_department["nb_second_home_2018"]-secondary_home_rate_evolution_department["nb_second_home_2008"])/secondary_home_rate_evolution_department["nb_second_home_2008"])*100
 secondary_home_rate_evolution_department.head(50)
 
-
-# In[41]:
-
-
 # 3.3 taxe d'habitation sur les maisons secondaires par département
-
 TAX_FILENAME = 'taxe_habitation.xlsx'
 
 tax_df = pd.read_excel(os.path.join(DATA_PATH, TAX_FILENAME))
@@ -622,10 +386,6 @@ tax_df
 
 
 # ##### 4. LIFE QUALITY
-
-# In[42]:
-
-
 # 4.1 Professionnels de santé pour 100 000 habitants par départements en 2023
 DATA_PATH = '../data/cleaned'
 HEALTH_FILENAME = 'health_df_cleaned.csv'
@@ -633,12 +393,7 @@ HEALTH_FILENAME = 'health_df_cleaned.csv'
 health_df = pd.read_csv(os.path.join(DATA_PATH, HEALTH_FILENAME))
 health_df.head(50)
 
-
-# In[43]:
-
-
 # 4.2 Taux de criminalité pour 1000 habitants par départements en 2020
-
 CRIMINALITY_FILENAME = 'criminality_df_cleaned.csv'
 
 criminality_df = pd.read_csv(os.path.join(DATA_PATH, CRIMINALITY_FILENAME))
@@ -657,11 +412,7 @@ criminality_per_department = criminality_aggregated.merge(georef_aggregated[['de
 criminality_per_department.tail(50)
 
 
-# In[44]:
-
-
 # 4.3 Nombre de jours de soleil par an par départements
-
 SUNNY_FILENAME = 'heures_ensoleillement.xlsx'
 
 sunny_df = pd.read_excel(os.path.join(DATA_PATH, SUNNY_FILENAME))
@@ -673,18 +424,9 @@ sunny_df_per_department.tail(50)
 
 
 # # 🚀 ENRICHED EXPORT
-
-# In[ ]:
-
-
 # Chemin du dossier où les fichiers seront enregistrés
 output_folder = "../data/enriched"
-
-# Assurez-vous que le dossier existe
 os.makedirs(output_folder, exist_ok=True)
-
-
-# In[ ]:
 
 
 # Liste des DataFrames et leurs noms
@@ -713,12 +455,7 @@ for name, df in dataframes.items():
 
 
 # # SCORING
-
 # ##### 1. TOURISM
-
-# In[45]:
-
-
 department_merged_df["ranking_hosting"]= department_merged_df["importance_x"]
 department_merged_df["ranking_touristic_sites"]= department_merged_df["importance_y"]
 calculation_tourism_scoring = department_merged_df.drop (columns=["importance_x", "importance_y"])
@@ -726,55 +463,25 @@ calculation_tourism_scoring
 
 
 # ##### 2. REAL ESTATE
-
-# In[46]:
-
-
 #fusion des différents dataframes pour réaliser le scoring
 real_estate_scoring_merge_1 = yield_calculation.merge(sales_df_per_year, on="department_name")
 real_estate_scoring_merge_2 = real_estate_scoring_merge_1.merge(vacants_housing_per_department, on="department_name")
 real_estate_scoring_merge_2
-
-
-# In[47]:
-
-
 #fusion du dernier dataframe
 real_estate_scoring_merge_3 = real_estate_scoring_merge_2.merge(tax_df, on="department_name")
 real_estate_scoring_merge_3
 real_estate_scoring_merge_3 = real_estate_scoring_merge_3.drop(columns=["average_price_per_m2","sales_amount","surface","average_price_m2","average_rental","Nombre d'avis d'impôt"
 ])
 real_estate_scoring_merge_3
-
-
-# In[48]:
-
-
 #éléments pour le calcul du scoring immo
 calculation_real_estate_scoring = real_estate_scoring_merge_3
 calculation_real_estate_scoring.head(50)
 calculation_real_estate_scoring["Taxe d'habitation moyenne en 2023"].astype(float)
-
-
-# In[49]:
-
-
 calculation_real_estate_scoring.tail(50)
 calculation_real_estate_scoring = calculation_real_estate_scoring.drop(columns="Taxe d'habitation moyenne en 2023")
 calculation_real_estate_scoring
 
-calculation_real_estate_scoring
-# In[ ]:
-
-
-calculation_real_estate_scoring
-
-
 # ##### 3. SECONDARY HOME
-
-# In[50]:
-
-
 #fusion des différents dataframes pour réaliser le scoring
 calculation_secondary_home_scoring_merge_1 = average_surface_municipality.merge(secondary_home_rate_evolution_department, on="department_name")
 calculation_secondary_home_scoring_merge_2 = calculation_secondary_home_scoring_merge_1.merge(tax_df, on="department_name")
@@ -784,27 +491,15 @@ calculation_secondary_home_scoring
 
 
 # ##### 4. LIFE QUALITY
-
-# In[51]:
-
-
 # MERGE DES 3 DF
 life_quality_df = sunny_df_per_department.merge(criminality_per_department, on='department_name', how='inner')
 life_quality_df = life_quality_df.merge(health_df, on='department_name', how='outer')
-
 # Remplacer les NaN par des valeurs nulles
 life_quality_df = life_quality_df.fillna(0)  # Vous pouvez remplacer 0 par d'autres valeurs par défaut si nécessaire
-
 # Supprimer les colonnes redondantes department_code_x et department_code_y
 life_quality_df = life_quality_df.drop(columns=['department_code_x', 'department_code_y', "ensemble des médecins", "dont généralistes", "dont spécialistes", "chirurg. dentistes", "pharm."])
-
 calculation_life_quality_scoring = pd.DataFrame (life_quality_df)
 calculation_life_quality_scoring.tail(50)
-
-
-# In[52]:
-
-
 #modification des 3 lignes nulles (je n'ai pas compris pourquoi elles l'étaient)
 calculation_life_quality_scoring.at[21,"criminality_per_1000"]=36.72
 calculation_life_quality_scoring.at[22,"criminality_per_1000"]=30.92
@@ -813,28 +508,15 @@ calculation_life_quality_scoring.at[22,"Ensoleillement (heures)"]=1512
 calculation_life_quality_scoring.at[92,"Ensoleillement (heures)"]=1719
 calculation_life_quality_scoring.at[92,"criminality_per_1000"]=43.79
 
-calculation_life_quality_scoring.head(50)
-
 
 # # **SCALING**
-
 # ##### 1. TOURISM
-
-# In[53]:
-
-
-from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler
 scaler = MinMaxScaler()
-
 #scaling pour calculer le scoring
 calculation_tourism_scoring_numeric = calculation_tourism_scoring.select_dtypes(include="number")
 df_scaled_tourism = scaler.fit_transform(calculation_tourism_scoring_numeric)
 df_scaled_tourism = pd.DataFrame(df_scaled_tourism, columns=calculation_tourism_scoring_numeric.columns, index=calculation_tourism_scoring.index)
 df_scaled_tourism.head(50)
-
-
-# In[54]:
-
 
 #cleaning des différents KPI
 df_scaled_tourism['ranking_hosting'] = round(df_scaled_tourism['ranking_hosting'], 2)
@@ -843,10 +525,6 @@ df_scaled_tourism
 
 
 # ##### 2. REAL ESTATE
-
-# In[55]:
-
-
 #scaling pour calculer le scoring
 calculation_real_estate_scoring_numeric = calculation_real_estate_scoring.select_dtypes(include="number")
 scaler = MinMaxScaler()
@@ -855,36 +533,21 @@ df_scaled_real_estate = pd.DataFrame(df_scaled_real_estate, index=real_estate_sc
 df_scaled_real_estate
 
 
-# In[56]:
-
-
 #cleaning des différents KPI
 df_scaled_real_estate['yield_rate'] = round(df_scaled_real_estate['yield_rate'], 2)
 df_scaled_real_estate['price_m2_growth'] = round(df_scaled_real_estate['price_m2_growth'], 2)
 df_scaled_real_estate['nb_vacants_housing'] = round(df_scaled_real_estate['nb_vacants_housing'], 2)
 df_scaled_real_estate
 
-
-# In[ ]:
-
-
 calculation_real_estate_scoring.tail(50)
 
 
 # ##### 3. SECONDARY HOME
-
-# In[57]:
-
-
 #scaling pour calculer le scoring
 calculation_secondary_home_scoring_numeric = calculation_secondary_home_scoring.select_dtypes(include="number")
 df_scaled_secondary_home = scaler.fit_transform(calculation_secondary_home_scoring_numeric)
 df_scaled_secondary_home = pd.DataFrame(df_scaled_secondary_home, columns=calculation_secondary_home_scoring_numeric.columns, index=calculation_secondary_home_scoring["department_name"])
 df_scaled_secondary_home.head(50)
-
-
-# In[58]:
-
 
 #cleaning des différents KPI
 df_scaled_secondary_home['surface'] = round(df_scaled_secondary_home['surface'], 2)
@@ -894,36 +557,21 @@ df_scaled_secondary_home
 
 
 # ##### 4. LIFE QUALITY
-
-# In[65]:
-
-
 #scaling pour calculer le scoring
 calculation_life_quality_scoring_numeric = calculation_life_quality_scoring.select_dtypes(include="number")
 df_scaled_life_quality = scaler.fit_transform(calculation_life_quality_scoring_numeric)
 df_scaled_life_quality = pd.DataFrame(df_scaled_life_quality, columns=calculation_life_quality_scoring_numeric.columns, index=calculation_life_quality_scoring["department_name"])
 df_scaled_life_quality.tail(50)
-
-
-# In[66]:
-
-
 #cleaning des différents KPI
 df_scaled_life_quality['Ensoleillement'] = round(df_scaled_life_quality['Ensoleillement (heures)'], 2)
 df_scaled_life_quality['Criminality'] = round(1 - df_scaled_life_quality['criminality_per_1000'], 2)
 df_scaled_life_quality['Health'] = round(df_scaled_life_quality['ensemble des médecins.1'], 2)
-
 df_scaled_life_quality = df_scaled_life_quality.drop(columns=["Ensoleillement (heures)", "criminality_per_1000", "ensemble des médecins.1"])
 df_scaled_life_quality
 
 
 # # **NORMALIZATION**
-
 # ##### 1. TOURISM
-
-# In[59]:
-
-
 tourism_scoring = pd.DataFrame()
 tourism_scoring['Hosting_score'] = df_scaled_tourism['ranking_hosting']*10
 tourism_scoring['Touristic_sites_score'] = df_scaled_tourism['ranking_touristic_sites']*10
@@ -932,10 +580,6 @@ tourism_scoring.sort_values("Global_tourism_score", ascending=False).head()
 
 
 # ##### 2. REAL ESTATE
-
-# In[60]:
-
-
 real_estate_scoring= pd.DataFrame()
 real_estate_scoring['Rentability_score'] = df_scaled_real_estate['yield_rate']*10
 real_estate_scoring['Growth_score'] = df_scaled_real_estate['price_m2_growth']*10
@@ -945,10 +589,6 @@ real_estate_scoring.sort_values("Global_real_estate_score", ascending=False).hea
 
 
 # ##### 3. SECONDARY HOME
-
-# In[63]:
-
-
 secondary_home_scoring= pd.DataFrame()
 secondary_home_scoring['Surface_score'] = df_scaled_secondary_home['surface']*10
 secondary_home_scoring['Secondary_home_growth_score'] = df_scaled_secondary_home['evolution_secondary_homes']*10
@@ -958,10 +598,6 @@ secondary_home_scoring.sort_values("Global_secondary_home_score", ascending=Fals
 
 
 # ##### 4. LIFE QUALITY
-
-# In[67]:
-
-
 life_quality_scoring= pd.DataFrame()
 life_quality_scoring['Sun_score'] = df_scaled_life_quality['Ensoleillement']*10
 life_quality_scoring['Safety_score'] = df_scaled_life_quality['Criminality']*10
@@ -971,25 +607,17 @@ life_quality_scoring.sort_values("Global_life_quality_score", ascending=False).h
 
 
 # ##### 5. GLOBAL SCORE
-
-# In[68]:
-
-
 global_scoring_merge_1 = tourism_scoring.merge(real_estate_scoring, on="department_name")
 global_scoring_merge_2 = global_scoring_merge_1.merge(secondary_home_scoring, on="department_name")
 global_scoring_merge_3 = global_scoring_merge_2.merge(life_quality_scoring, on="department_name")
 global_scoring_merge_3["Global_scoring"]= round((global_scoring_merge_3["Global_tourism_score"]+global_scoring_merge_3["Global_real_estate_score"]+global_scoring_merge_3["Global_secondary_home_score"]+global_scoring_merge_3["Global_life_quality_score"])/4,1)
 global_scoring_table=global_scoring_merge_3
 global_scoring_table.sort_values("Global_scoring", ascending=False).head(25)
-
-
-# In[85]:
-
-
 #rajout dans le tableau "global score" de toutes les informations sur les départements qui ont permis de calculer le Global Score
 global_scoring_info_merge_1 = global_scoring_table.merge(calculation_real_estate_scoring, on="department_name", how="outer")
 global_scoring_info_merge_2 = global_scoring_info_merge_1.merge(calculation_secondary_home_scoring, on="department_name", how="outer")
 global_scoring_info_merge_3 = global_scoring_info_merge_2.merge(calculation_life_quality_scoring, on="department_name", how="outer")
+
 
 # Fonction pour remplacer les points par des virgules dans les valeurs flottantes
 def replace_dot_with_comma(value):
@@ -999,39 +627,21 @@ def replace_dot_with_comma(value):
 
 # Appliquer la fonction à toutes les cellules du DataFrame
 global_scoring_info_merge_3 = global_scoring_info_merge_3.apply(lambda x: x.apply(replace_dot_with_comma))
-
-
 global_scoring_info_merge_3.head(80)
-
-
-# In[86]:
 
 
 # Chemin du dossier où les fichiers seront enregistrés
 output_folder = "../data/enriched"
-
-# Assurez-vous que le dossier existe
 os.makedirs(output_folder, exist_ok=True)
 
 dataframes = {
     "global_scoring_per_department": global_scoring_info_merge_3,
 }
 
-# Exportation des DataFrames en CSV
+
+
+# Exportation du Global Scoring en CSV
 for name, df in dataframes.items():
     output_path = os.path.join(output_folder, f"{name}_enriched.csv")
     df.to_csv(output_path, index=False)
     print(f"DataFrame {name} exporté vers {output_path}")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
