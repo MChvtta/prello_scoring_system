@@ -3,9 +3,6 @@
 
 # # ⚙️ **DATA IMPORT**
 
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
 import os
@@ -34,21 +31,10 @@ real_estate_df = pd.read_csv(os.path.join(DATA_PATH, REAL_ESTATE_FILENAME))
 
 
 # # 🔭 **DATA EXPLORATION**
-# 
-# 
-# 
 
 # #### DF POI
-
-# In[ ]:
-
-
 poi_df.head() #DATA CLEAN
 # importance : poids interne pour évaluer l'importance
-
-
-# In[ ]:
-
 
 # Création de la carte avec Plotly Express
 #fig = px.scatter_mapbox(poi_df, lat='latitude', lon='longitude', hover_name='name_reprocessed',
@@ -66,10 +52,6 @@ poi_df.head() #DATA CLEAN
 # Affichage du graphique
 #fig.show()
 
-
-# In[ ]:
-
-
 #poi_count = poi_df['poi'].value_counts()
 
 # Création du diagramme circulaire avec Plotly Express
@@ -78,32 +60,16 @@ poi_df.head() #DATA CLEAN
 # Affichage du graphique
 #fig.show()
 
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 poi_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
 
 poi_df.info()
 poi_df.isnull().sum()
 
 
 # #### DF SITE
-
-# In[ ]:
-
-
 site_df.head() # DATA CLEAN
 # importance : poids interne pour évaluer l'importance
-
-
-# In[ ]:
-
 
 # Création de la carte avec Plotly Express
 #fig = px.scatter_mapbox(site_df, lat='latitude', lon='longitude', hover_name='name_reprocessed',
@@ -121,10 +87,6 @@ site_df.head() # DATA CLEAN
 # Affichage du graphique
 #fig.show()
 
-
-# In[ ]:
-
-
 #poi_count = site_df['poi'].value_counts()
 
 # Création du diagramme circulaire avec Plotly Express
@@ -133,254 +95,92 @@ site_df.head() # DATA CLEAN
 # Affichage du graphique
 #fig.show()
 
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 site_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
 
 site_df.info()
 site_df.isnull().sum()
 
 
 # #### DF SALARY
-
-# In[ ]:
-
-
 salary_df.head() # DATA CLEAN
-
-
-# In[ ]:
-
-
 salary_df["year"].unique()
-
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 salary_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
-
 salary_df.info()
 salary_df.isnull().sum()
 
 
 # #### DF GEO REF
-
-# In[ ]:
-
-
 georef_df.head()
-
-
-# In[ ]:
-
-
 georef_df["municipality_type"].unique()
-
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 georef_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
-
 georef_df.info()
 georef_df.isnull().sum()
 
 
 # #### DF STOCK
-
-# In[3]:
-
-
 stock_df.head() #drop de int64_field_0
-
-
-# In[2]:
-
-
 stock_df["year"].unique()
-
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 stock_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
-
 stock_df.info() # supprimer la colonne int64_field-0
 stock_df.isnull().sum()
 
 
 # #### DF SALES
-
-# In[ ]:
-
-
 sales_df.head()
-
-
-# In[ ]:
 
 
 # 510 211 DOUBLONS !
 sales_df.duplicated().sum()#.drop_duplicates()
-
-
-# In[ ]:
-
-
 s = (sales_df['sales_amount']
              .value_counts()
              .loc[sales_df['sales_amount'].value_counts() > 10])
-
-
-# In[ ]:
-
-
 s.index = s.index.astype(int)
 s.loc[(s.index % 10) != 0]
-
-
-# In[ ]:
-
-
 s.plot
-
-
-# In[ ]:
-
-
 sales_df['sales_amount'].value_counts().loc[sales_df['sales_amount'].value_counts() > 10] #[220623264]#sort_values(ascending=True).astype(int)
-
-
-# In[ ]:
-
-
 sales_df.info(), #il manque des latitude et longitude
 sales_df.isnull().sum()
 
 
 # #### DF POPULATION
-
-# In[ ]:
-
-
 population_df.head()
-
-
-# In[ ]:
-
-
 population_df["year"].unique()
-
-
-# In[ ]:
-
-
 # ??? DOUBLONS !
 population_df.duplicated().sum
-
-
-# In[ ]:
-
-
 population_df.info() #colonne YEAR en format INT64
 population_df.isnull().sum()
 
 
 # #### DF POVERTY
-
-# In[ ]:
-
-
 poverty_df.head()
-
-
-# In[ ]:
-
-
 poverty_df["year"].unique()
-
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 poverty_df.duplicated().sum()
-
-
-# In[ ]:
-
-
 poverty_df.info() # YEAR est en type INT64 et non DATE
 poverty_df.isnull().sum()
 
 
 # #### DF REAL ESTATE
-
-# In[2]:
-
-
 real_estate_df.head()
-
-
-# In[ ]:
-
-
 # 0 DOUBLONS !
 real_estate_df.duplicated().sum()
-
-
-# In[ ]:
-
-
 real_estate_df.info()
 real_estate_df.isnull().sum()
 
 
 # # 🧹 **DATA CLEANING**
-
 # ### CLEANING
-
 # ##### DF_SALES CLEANING
-
-# In[ ]:
-
-
 # SALES_DF: Suppression des doublons > nous passons de 4,3M de lignes à 3,821M
 sales_df = sales_df.drop_duplicates()
 sales_df.shape
 
-
-# In[ ]:
-
-
 # SALES_DF: Check si les doublons on été enlevés : OK
 sales_df.duplicated().sum()
-
-
-# In[ ]:
 
 
 # SALES_DF: Suppression des prix au m2 supérieur à 30K€ et inférieur à 1K€ > nous passons à 3,3399M de lignes
@@ -388,24 +188,14 @@ sales_df = sales_df[(sales_df['sales_price_m2'] <= 30000) & (sales_df['sales_pri
 sales_df.shape
 
 
-# In[ ]:
-
-
 # SALES_DF:
 s2 = (sales_df['sales_amount']
              .value_counts()
              .loc[sales_df['sales_amount'].value_counts() > 10])
 
-
-# In[ ]:
-
-
 # SALES_DF:
 s2.index = s2.index.astype(int)
 s2.loc[(s2.index % 10) != 0]
-
-
-# In[ ]:
 
 
 # SALES_DF:
@@ -413,15 +203,9 @@ sales_df = sales_df[sales_df['sales_amount'] > 1] # on enlève les 166 fois ou s
 sales_df.shape
 
 
-# In[ ]:
-
-
 # SALES_DF: changement du type sales_date en datetime
 sales_df['sales_date'] = pd.to_datetime(sales_df['sales_date'])
 sales_df.info()
-
-
-# In[ ]:
 
 
 # SALES_DF: Création de l'histogramme avec Plotly Express
@@ -431,7 +215,7 @@ sales_df.info()
 #fig.show()
 
 
-# In[ ]:
+
 
 
 # SALES_DF: Création de l'histogramme avec Plotly Express
@@ -442,30 +226,18 @@ sales_df.info()
 
 
 # ##### DF_SALARY CLEANING
-
-# In[ ]:
-
-
 # DF_SALARY: ROUND avg_net_salary
 salary_df['avg_net_salary'] = salary_df['avg_net_salary'].round()
 salary_df.head()
 
 
 # ##### DF_REAL_ESTATE CLEANING
-
-# In[ ]:
-
-
 # DF_REAL_ESTATE: suppression des nulls
 real_estate_df = real_estate_df.dropna(axis=1)
 real_estate_df.isnull().sum()
 
 
 # ##### DF_SITE CLEANING
-
-# In[ ]:
-
-
 # SITE_DF: tri avec les données entre parenthèses de la colonne "name" inclues
 
 import re
@@ -483,20 +255,11 @@ print (site_df["data_inside_parenthesis"].value_counts().head(50))
 
 #faire un mapping des colonnes poi, qui sont en fait plus pertinentes que celles de la colonne "type"
 
-
-# In[ ]:
-
-
 # SITE_DF: création d'un dictionnaire intégrant toutes les différentes valeurs inclues dans la colonne "poi"
 s = site_df["poi"].value_counts()[site_df["poi"]]
 {k: "toto" for k in s.index}
 
-
-# In[ ]:
-
-
 # SITE_DF: création d'un dictionnaire avec les catégories associées aux valeurs de la colonne POI
-
 category_dict = {'1': 'Patrimoine',
  '2': 'Patrimoine',
  'zoo': 'Entertainment',
@@ -536,20 +299,12 @@ category_dict = {'1': 'Patrimoine',
  'national_park': 'Nature',
  'protected_area': 'Nature'}
 
-
-# In[ ]:
-
-
 # SITE_DF: création de la colonne "catégorie"
 site_df["Category"] = site_df["poi"].map(category_dict)
 site_df
 
 
 # ### CLEANED DF CHECK
-
-# In[ ]:
-
-
 poi_df.info()
 site_df.info()
 salary_df.info()
@@ -561,65 +316,8 @@ poverty_df.info()
 real_estate_df.info()
 
 
-# In[ ]:
-
-
-poi_df.head(1)
-
-
-# In[ ]:
-
-
-site_df.head(1) 
-
-
-# In[ ]:
-
-
-salary_df.head(1)
-
-
-# In[ ]:
-
-
-georef_df.head(1) 
-
-
-# In[ ]:
-
-
-stock_df.head(1) 
-
-
-# In[ ]:
-
-
-sales_df.dtypes
-
-
-# In[ ]:
-
-
-population_df.head(1) 
-
-
-# In[ ]:
-
-
-poverty_df.head(1)
-
-
-# In[ ]:
-
-
-real_estate_df.head(1)
-
 
 # # 🚀 **EXPORT**
-
-# In[ ]:
-
-
 # Chemin du dossier où les fichiers seront enregistrés
 output_folder = "../data/cleaned"
 
